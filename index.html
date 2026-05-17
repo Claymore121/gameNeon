@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Neon Dash</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud">
+      <span id="scoreDisplay">0</span>
+      <span id="bestDisplay">BEST: 0</span>
+    </div>
+
+    <div id="startScreen" class="overlay">
+      <h1 class="title">NEON DASH</h1>
+      <p class="subtitle">Dodge the walls. Survive.</p>
+      <p class="controls">Press <span class="key">SPACE</span> or <span class="key">TAP</span> to jump</p>
+      <p class="best-start">Best: <span id="startBest">0</span></p>
+      <div class="menu-buttons">
+        <button id="playBtn" class="neon-btn">PLAY</button>
+        <button id="skinsBtn" class="neon-btn neon-btn-secondary">SKINS</button>
+        <button id="levelsBtn" class="neon-btn neon-btn-tertiary">LEVELS</button>
+      </div>
+    </div>
+
+    <div id="skinsScreen" class="overlay hidden">
+      <h2 class="title-sm">SKINS</h2>
+      <div class="skin-section">
+        <p class="skin-label">COLOR</p>
+        <div id="colorGrid" class="color-grid"></div>
+      </div>
+      <div class="skin-section">
+        <p class="skin-label">SHAPE</p>
+        <div id="shapeGrid" class="shape-grid">
+          <button class="shape-btn" data-shape="square">■</button>
+          <button class="shape-btn" data-shape="triangle">▲</button>
+          <button class="shape-btn" data-shape="diamond">◆</button>
+          <button class="shape-btn" data-shape="pentagon">⬠</button>
+          <button class="shape-btn" data-shape="hexagon">⬡</button>
+          <button class="shape-btn" data-shape="star">★</button>
+          <button class="shape-btn" data-shape="circle">●</button>
+        </div>
+      </div>
+      <button id="backBtn" class="neon-btn back-btn">BACK</button>
+    </div>
+
+    <div id="levelsScreen" class="overlay hidden">
+      <h2 class="title-sm">LEVELS</h2>
+      <div class="level-grid">
+        <button class="level-btn" data-level="cyber">
+          <span class="level-preview" style="background:#ff00ff"></span>
+          <span class="level-name">CYBERPUNK</span>
+        </button>
+        <button class="level-btn" data-level="toxic">
+          <span class="level-preview" style="background:#00ff66"></span>
+          <span class="level-name">TOXIC</span>
+        </button>
+        <button class="level-btn" data-level="inferno">
+          <span class="level-preview" style="background:#ff4400"></span>
+          <span class="level-name">INFERNO</span>
+        </button>
+      </div>
+      <button id="levelsBackBtn" class="neon-btn back-btn">BACK</button>
+    </div>
+
+    <div id="gameoverScreen" class="overlay hidden">
+      <h2 class="title-sm">GAME OVER</h2>
+      <div class="results">
+        <p>Score: <span id="finalScore">0</span></p>
+        <p>Best: <span id="finalBest">0</span></p>
+        <p id="newBest" class="hidden">✦ NEW BEST! ✦</p>
+      </div>
+      <div class="menu-buttons">
+        <button id="restartBtn" class="neon-btn">RETRY</button>
+        <button id="gameoverSkinsBtn" class="neon-btn neon-btn-secondary">SKINS</button>
+      </div>
+    </div>
+
+    <button id="soundBtn">🔊</button>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
