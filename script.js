@@ -179,22 +179,6 @@ function setLevel(id) {
   document.querySelectorAll('.level-btn').forEach(el => el.classList.toggle('active', el.dataset.level === id));
 }
 
-// ---- BACKGROUND DOTS ----
-let bgDots = [];
-
-function initBgDots() {
-  bgDots = [];
-  for (let i = 0; i < 50; i++) {
-    bgDots.push({
-      x: Math.random() * (W || 800),
-      y: Math.random() * (H || 600),
-      size: 1 + Math.random() * 1.5,
-      speed: 0.15 + Math.random() * 0.5,
-      alpha: 0.04 + Math.random() * 0.08,
-    });
-  }
-}
-
 // ---- GAME STATE ----
 let screen = 'start';
 let score = 0;
@@ -300,7 +284,7 @@ function emit(x, y, n, color, spread) {
 function jump() {
   if (screen !== 'playing') return;
   player.vy = JF;
-  emit(player.x, player.y + PS, 10, skinColor, 3);
+  emit(player.x, player.y + PS, 6, skinColor, 3);
   snd('jump');
 }
 
@@ -312,9 +296,10 @@ function gameOver() {
   flashAlpha = 0.7;
   streak = 0;
   invincible = false;
-  emit(player.x, player.y + PS / 2, 40, '#ff00ff', 7);
-  emit(player.x, player.y + PS / 2, 25, '#00f0ff', 6);
-  emit(player.x, player.y + PS / 2, 15, '#ffff00', 4);
+  invincibleFrames = 0;
+  emit(player.x, player.y + PS / 2, 25, '#ff00ff', 7);
+  emit(player.x, player.y + PS / 2, 15, '#00f0ff', 6);
+  emit(player.x, player.y + PS / 2, 8, '#ffff00', 4);
 
   if (score > best) {
     best = score;
@@ -360,7 +345,7 @@ function update() {
         o.starCollected = true;
         invincible = true;
         score += 5;
-        emit(o.x + OW / 2, o.gapY, 30, '#ffdd00', 5);
+        emit(o.x + OW / 2, o.gapY, 18, '#ffdd00', 5);
         snd('powerup');
         popups.push({
           x: player.x,
@@ -378,7 +363,7 @@ function update() {
       streak++;
       scorePulse = 1;
 
-      emit(o.x + OW / 2, o.gapY, 8, '#ff00ff', 3);
+      emit(o.x + OW / 2, o.gapY, 5, '#ff00ff', 3);
 
       const isMilestone = streak > 0 && streak % 10 === 0;
       popups.push({
@@ -393,7 +378,7 @@ function update() {
       });
 
       if (isMilestone) {
-        emit(o.x + OW / 2, o.gapY, 25, '#ffdd00', 6);
+        emit(o.x + OW / 2, o.gapY, 15, '#ffdd00', 6);
         tone(500, 1800, 0.2, 'sine', 0.15);
       } else {
         snd('score');
@@ -416,7 +401,7 @@ function update() {
       if (collides(o)) {
         if (invincible) {
           invincible = false;
-          emit(player.x, player.y + PS / 2, 30, '#ffdd00', 6);
+          emit(player.x, player.y + PS / 2, 18, '#ffdd00', 6);
           snd('die');
           continue;
         }
@@ -463,17 +448,9 @@ function update() {
 
   if (screen === 'playing') {
     trail.unshift({ y: player.y });
-    if (trail.length > 8) trail.pop();
+    if (trail.length > 4) trail.pop();
   } else if (trail.length > 0) {
     trail = [];
-  }
-
-  for (const d of bgDots) {
-    d.x -= d.speed;
-    if (d.x < -5) {
-      d.x = W + 5;
-      d.y = Math.random() * H;
-    }
   }
 
   scoreDisplay.textContent = score;
@@ -484,24 +461,6 @@ function update() {
 function drawBackground() {
   ctx.fillStyle = '#0a0a0f';
   ctx.fillRect(0, 0, W, H);
-
-  ctx.strokeStyle = 'rgba(255,255,255,0.02)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 50) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = 0; y < H; y += 50) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-}
-
-function drawBgDots() {
-  for (const d of bgDots) {
-    ctx.globalAlpha = d.alpha;
-    ctx.fillStyle = '#aaddff';
-    ctx.fillRect(d.x, d.y, d.size, d.size);
-  }
-  ctx.globalAlpha = 1;
 }
 
 function drawGround() {
@@ -644,52 +603,18 @@ function drawObstacles() {
     const pulse = 0.85 + 0.15 * Math.sin(frame * 0.04 + o.x);
 
     ctx.shadowColor = currentLevel.wall;
-    ctx.shadowBlur = 14 * pulse;
+    ctx.shadowBlur = 12 * pulse;
     ctx.fillStyle = currentLevel.wall;
     ctx.fillRect(o.x, 0, OW, Math.max(0, o.gapY - half));
     ctx.fillRect(o.x, o.gapY + half, OW, Math.max(0, GY - (o.gapY + half)));
     ctx.shadowBlur = 0;
-
-    ctx.shadowColor = currentLevel.wall;
-    ctx.shadowBlur = 5;
-    ctx.strokeStyle = currentLevel.wallLight;
-    ctx.lineWidth = 2;
-
-    const topEdge = Math.max(0, o.gapY - half);
-    if (topEdge > 0) {
-      ctx.beginPath();
-      ctx.moveTo(o.x - 2, topEdge);
-      ctx.lineTo(o.x + OW + 2, topEdge);
-      ctx.stroke();
-    }
-
-    const botEdge = o.gapY + half;
-    if (botEdge < GY) {
-      ctx.beginPath();
-      ctx.moveTo(o.x - 2, botEdge);
-      ctx.lineTo(o.x + OW + 2, botEdge);
-      ctx.stroke();
-    }
-
-    ctx.strokeStyle = `rgba(${currentLevel.wallScanRgb}, ${0.1 + 0.05 * Math.sin(frame * 0.04 + o.x)})`;
-    ctx.lineWidth = 1;
-    for (let lx = o.x + 8; lx < o.x + OW - 4; lx += 12) {
-      ctx.beginPath();
-      ctx.moveTo(lx, 0);
-      ctx.lineTo(lx, Math.max(0, o.gapY - half));
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(lx, o.gapY + half);
-      ctx.lineTo(lx, GY);
-      ctx.stroke();
-    }
 
     if (o.hasStar && !o.starCollected) {
       const sx = o.x + OW / 2;
       const sy = o.gapY;
       const sp = 0.8 + 0.2 * Math.sin(frame * 0.06);
       ctx.shadowColor = '#ffdd00';
-      ctx.shadowBlur = 14 * sp;
+      ctx.shadowBlur = 10 * sp;
       ctx.fillStyle = '#ffdd00';
       ctx.beginPath();
       ctx.moveTo(sx, sy - 8 * sp);
@@ -700,21 +625,16 @@ function drawObstacles() {
       ctx.fill();
       ctx.shadowBlur = 0;
     }
-
-    ctx.shadowBlur = 0;
   }
 }
 
 function drawParticles() {
   for (const p of particles) {
     ctx.globalAlpha = p.life;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur = 6;
     ctx.fillStyle = p.color;
     ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
   }
   ctx.globalAlpha = 1;
-  ctx.shadowBlur = 0;
 }
 
 function drawPopups() {
@@ -723,12 +643,9 @@ function drawPopups() {
     ctx.fillStyle = pop.color || '#fff';
     ctx.font = `bold ${pop.big ? 28 : 22}px "Segoe UI", sans-serif`;
     ctx.textAlign = 'center';
-    ctx.shadowColor = pop.big ? '#ffdd00' : '#00f0ff';
-    ctx.shadowBlur = pop.big ? 16 : 8;
     ctx.fillText(pop.text, pop.x, pop.y);
   }
   ctx.globalAlpha = 1;
-  ctx.shadowBlur = 0;
 }
 
 function drawFlash() {
@@ -744,7 +661,6 @@ function render() {
   ctx.save();
   ctx.translate(sx, sy);
   drawBackground();
-  drawBgDots();
   drawGround();
   drawTrail();
   drawObstacles();
@@ -888,10 +804,9 @@ soundBtn.addEventListener('click', (e) => {
 
 // ---- INIT ----
 best = parseInt(localStorage.getItem('neondash_best')) || 0;
-startBest.textContent = best;
+  startBest.textContent = best;
 bestDisplay.textContent = 'BEST: ' + best;
-initBgDots();
-initSkins();
+  initSkins();
 reset();
 resize();
 loop();
